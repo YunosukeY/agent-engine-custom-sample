@@ -55,16 +55,18 @@ class CustomAgent:
             user_id=user_id,
             session_id=session_id,
         )
+        history = [event.content for event in session.events if event.content is not None]
 
+        user_content = UserContent(message)
         response = self.client.models.generate_content(
             model="gemini-2.5-flash-preview-05-20",
-            contents=message,
+            contents=history + [user_content],
         )
 
         user_event = Event(
             invocation_id=response.response_id,
             author="user",
-            content=UserContent(message),
+            content=user_content,
         )
         self.session_service.append_event(
             session=session,
@@ -92,11 +94,13 @@ class CustomAgent:
             user_id=user_id,
             session_id=session_id,
         )
+        history = [event.content for event in session.events if event.content is not None]
 
+        user_content = UserContent(message)
         response_text = ""
         for chunk in self.client.models.generate_content_stream(
             model="gemini-2.5-flash-preview-05-20",
-            contents=message,
+            contents=history + [user_content],
         ):
             response_id = chunk.response_id
             response_text += chunk.text
@@ -105,7 +109,7 @@ class CustomAgent:
         user_event = Event(
             invocation_id=response_id,
             author="user",
-            content=UserContent(message),
+            content=user_content,
         )
         self.session_service.append_event(
             session=session,
