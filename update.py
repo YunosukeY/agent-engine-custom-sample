@@ -13,7 +13,7 @@ agent_engines.update(
     resource_name=os.environ["RESOURCE_ID"],
     agent_engine=CustomAgent(),
     requirements=[
-        "google-cloud-aiplatform[agent-engines]>=1.94.0",
+        "google-cloud-aiplatform[adk,agent-engines]>=1.94.0",
         "google-genai>=1.16.1",
     ],
     display_name="Custom agent sample",
