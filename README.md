@@ -1,18 +1,18 @@
 # Vertex AI Agent Engine Custom Template Sample
 
-Initialize
+初回デプロイ
 
 ```bash
-uv run create.py
+uv run --env-file .env create.py
 ```
 
-Deploy
+2 回目以降
 
 ```bash
-uv run --env-file .env deploy.py
+uv run --env-file .env update.py
 ```
 
-Check
+動作確認
 
 ```bash
 uv run --env-file .env test_remote_agent.py
