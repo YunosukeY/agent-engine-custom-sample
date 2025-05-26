@@ -1,5 +1,9 @@
 from typing import TypedDict
-
+from google.adk.events import Event
+from google.genai.types import UserContent, ModelContent
+from google import genai
+from google.adk.sessions import VertexAiSessionService
+import os
 
 class Message(TypedDict):
     id: str
@@ -9,19 +13,20 @@ class Message(TypedDict):
 
 
 class CustomAgent:
-    def set_up(self):
-        from google import genai
-        from google.adk.sessions import VertexAiSessionService
-        import os
+    def __init__(self, project_id: str, location: str, model: str):
+        self.project_id = project_id
+        self.location = location
+        self.model = model
 
+    def set_up(self):
         self.client = genai.Client(
             vertexai=True,
-            project=os.environ["PROJECT_ID"],
-            location=os.environ["LOCATION"],
+            project=self.project_id,
+            location=self.location,
         )
         self.session_service = VertexAiSessionService(
-            os.environ["PROJECT_ID"],
-            os.environ["LOCATION"],
+            self.project_id,
+            self.location,
         )
         self.app_name = os.environ["GOOGLE_CLOUD_AGENT_ENGINE_ID"]
 
@@ -47,9 +52,6 @@ class CustomAgent:
         )
 
     def send_message(self, user_id: str, session_id: str, message: str):
-        from google.adk.events import Event
-        from google.genai.types import UserContent, ModelContent
-
         session = self.session_service.get_session(
             app_name=self.app_name,
             user_id=user_id,
@@ -59,7 +61,7 @@ class CustomAgent:
 
         user_content = UserContent(message)
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            model=self.model,
             contents=history + [user_content],
         )
 
@@ -86,9 +88,6 @@ class CustomAgent:
         return response.text
 
     def send_message_stream(self, user_id: str, session_id: str, message: str):
-        from google.adk.events import Event
-        from google.genai.types import UserContent, ModelContent
-
         session = self.session_service.get_session(
             app_name=self.app_name,
             user_id=user_id,
@@ -99,7 +98,7 @@ class CustomAgent:
         user_content = UserContent(message)
         response_text = ""
         for chunk in self.client.models.generate_content_stream(
-            model="gemini-2.5-flash-preview-05-20",
+            model=self.model,
             contents=history + [user_content],
         ):
             response_id = chunk.response_id
